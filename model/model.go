@@ -12,3 +12,18 @@ type model struct {
 	cursor   int              // which tool item the cursor is pointing at
 	selected map[int]struct{} // which tool items are selected
 }
+
+// initialModel defines the initial state of the application.
+// Defining a function to return the initial model, but could use a variable elsewhere, too.
+func initialModel() model {
+	return model{
+
+		// List all the IoT Tools usable with the app.
+		choices: []string{"Send IoT Jobs", "Dictionary", "Disenroll Inverter", "Upload .json to AWS S3"},
+
+		// A map which indicates which choices are selected.
+		// For now, only one choice is possible, for later states (e.g. Downloading commands from Dictionary), we can select multiples.
+		// The keys refer to the indexes of the "choices" slice, above.
+		selected: make(map[int]struct{}),
+	}
+}
