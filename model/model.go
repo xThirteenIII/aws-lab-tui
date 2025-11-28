@@ -21,7 +21,7 @@ type model struct {
 
 // initialModel defines the initial state of the application.
 // Defining a function to return the initial model, but could use a variable elsewhere, too.
-func initialModel() model {
+func InitialModel() model {
 	return model{
 
 		// List all the IoT Tools usable with the app.
