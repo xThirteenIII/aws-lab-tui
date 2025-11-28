@@ -8,6 +8,8 @@
 package model
 
 import (
+	"fmt"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -101,7 +103,34 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+// View looks at the model at its current state, and returns a string, which is the updated UI!
+// Redrawing logic and stuff like that is taken care for by BubbleTea.
 func (m model) View() string {
+	// The header
+	ui := "Select the IoT Tool you want to use\n\n"
 
-	return ""
+	// Iterate over choices
+	for i, choice := range m.choices {
+
+		// Is the cursor pointing at this choice?
+		cursor := " " // no cursor
+		if m.cursor == i {
+			cursor = ">" // cursor!
+		}
+
+		// Is this choice selected?
+		checked := " " // not slected
+		if _, ok := m.selected[i]; ok {
+			checked = "x" // selected
+		}
+
+		// render the row
+		ui += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
+	}
+
+	// The footer
+	ui += "\nPress q to quit.\n"
+
+	// send the UI for rendering
+	return ui
 }
