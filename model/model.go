@@ -7,6 +7,10 @@
 
 package model
 
+import (
+	tea "github.com/charmbracelet/bubbletea"
+)
+
 type model struct {
 	choices  []string         // items on the tool list
 	cursor   int              // which tool item the cursor is pointing at
@@ -26,4 +30,12 @@ func initialModel() model {
 		// The keys refer to the indexes of the "choices" slice, above.
 		selected: make(map[int]struct{}),
 	}
+}
+
+// Init returns an initial command that performs some I/O.
+// No command is needed for now, so we return nil, which translates to no command.
+func Init() tea.Cmd {
+
+	// nil means "no I/O for now, please"
+	return nil
 }
