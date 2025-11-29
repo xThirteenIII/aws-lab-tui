@@ -10,11 +10,15 @@ package model
 import (
 	"aws-iot-tui/stack"
 
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 // Order struct from biggest Bytes to lowest, to minimize padding and optimize memory.
 type model struct {
+	// list represents a list of items to show.
+	mainMenuList list.Model // A lot of Bytes
+
 	choices []string // items on the tool list, slice: 24B
 	// stateStack is a Stack structure that holds states history
 	// It allows to go back and forth in the menu.
@@ -28,6 +32,7 @@ type model struct {
 // initialModel defines the initial state of the application.
 // Defining a function to return the initial model, but could use a variable elsewhere, too.
 func InitialModel() model {
+
 	// initStack creates a new empty stack
 	initStack := stack.NewStack[state]()
 
@@ -45,6 +50,15 @@ func InitialModel() model {
 
 		// List all the IoT Tools usable with the app.
 		choices: []string{"Send IoT Jobs", "Dictionary", "Disenroll Inverter", "Upload .json to AWS S3"},
+
+		mainMenuList: list.New(
+			[]list.Item{
+				item{title: "Iot Jobs", desc: "Send an IoT Job to a Thing"},
+				item{title: "Dictionary", desc: "Download commands from HeidiDB database, in js format"},
+				item{title: "Disenroll Inverter", desc: "Disenroll an Haier Inverter from database and dynamoDB"},
+				item{title: "Upload to S3", desc: "Select a new firmware version and upload its .json files to S3"},
+			},
+			list.NewDefaultDelegate(), 0, 0),
 	}
 }
 
