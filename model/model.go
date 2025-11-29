@@ -13,15 +13,16 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// Order struct from biggest Bytes to lowest, to minimize padding and optimize memory.
 type model struct {
-
+	choices []string // items on the tool list, slice: 24B
 	// stateStack is a Stack structure that holds states history
 	// It allows to go back and forth in the menu.
-	stateStack   *stack.Stack[state]
-	currentState state
+	stateStack *stack.Stack[state] // states history, pointer: 8B
 
-	choices []string // items on the tool list
-	cursor  int      // which tool item the cursor is pointing at
+	currentState state // int: 8B
+
+	cursor int // which tool item the cursor is pointing at, int: 8B
 }
 
 // initialModel defines the initial state of the application.
