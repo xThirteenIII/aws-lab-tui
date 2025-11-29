@@ -9,7 +9,6 @@ package model
 
 import (
 	"aws-iot-tui/stack"
-	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -82,64 +81,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-// updateMainMenu updates the model when the user is in the main menu titlescreen.
-func (m model) updateMainMenu(msg tea.Msg) (tea.Model, tea.Cmd) {
-
-	switch message := msg.(type) {
-
-	// Is the message a keyPress?
-	case tea.KeyMsg:
-
-		// Cool, what key was pressed?
-		switch message.String() {
-
-		// close the program
-		case "ctrl+c", "q":
-			return m, tea.Quit
-		// navigate up
-		// cursor is decremented even if counterintuitive!
-		//
-		// choices[0]
-		// choices[1]
-		// choices[2]
-		case "up", "k":
-			if m.cursor > 0 {
-				m.cursor--
-			}
-		// navigate down
-		case "down", "j":
-			if m.cursor < len(m.choices)-1 {
-				m.cursor++
-			}
-		case "enter":
-			m.currentState = selectIoTJob
-			m.stateStack.Push(selectIoTJob)
-		}
-
-	}
-
-	return m, nil
-}
-
-// updateSelectJob updates the model when the user is in the selectIoTJob state.
-func (m model) updateSelectJob(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch message := msg.(type) {
-
-	// Was a key pressed?
-	case tea.KeyMsg:
-
-		// Cool, which one?
-		switch message.String() {
-		case "ctrl+c", "q":
-			return m, tea.Quit
-		case "esc":
-			m.stateStack.Pop()
-			m.currentState = m.stateStack.Peek()
-		}
-	}
-	return m, nil
-}
-
 // View looks at the model at its current state, and returns a string, which is the updated UI!
 // Redrawing logic and stuff like that is taken care for by BubbleTea.
 func (m model) View() string {
@@ -151,40 +92,4 @@ func (m model) View() string {
 		return m.viewSelectJob()
 	}
 	return ""
-}
-
-func (m model) viewMainMenu() string {
-
-	// The header
-	mainMenu := "Select the IoT Tool you want to use\n\n"
-
-	// Iterate over choices
-	for i, choice := range m.choices {
-
-		// Is the cursor pointing at this choice?
-		cursor := " " // no cursor
-		if m.cursor == i {
-			cursor = ">" // cursor!
-		}
-
-		// render the row
-		mainMenu += fmt.Sprintf("%s %s\n", cursor, choice)
-	}
-
-	// The footer
-	mainMenu += "\nPress q to quit.\n"
-
-	// send the UI for rendering
-	return mainMenu
-}
-
-func (m model) viewSelectJob() string {
-
-	// The header
-	selectJobMenu := "Type the name you want to give to the IoT Job\n\n"
-
-	selectJobMenu += "\nPress q to quit. Esc to back.\n"
-
-	// send the UI for rendering
-	return selectJobMenu
 }
