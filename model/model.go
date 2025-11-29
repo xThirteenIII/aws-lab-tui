@@ -11,6 +11,7 @@ import (
 	"aws-iot-tui/stack"
 
 	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -18,6 +19,7 @@ import (
 type model struct {
 	// list represents a list of items to show.
 	mainMenuList list.Model // A lot of Bytes
+	input        textinput.Model
 
 	choices []string // items on the tool list, slice: 24B
 	// stateStack is a Stack structure that holds states history
@@ -38,7 +40,8 @@ func InitialModel() model {
 
 	// push mainMenu as default first state onto the Stack
 	initStack.Push(mainMenu)
-	return model{
+
+	initModel := model{
 
 		// WARNING: to set the currentState is crucial, otherwise program will create unlimited goRoutines!
 		// runtime: goroutine stack exceeds 1000000000-byte limit
@@ -60,13 +63,13 @@ func InitialModel() model {
 			},
 			list.NewDefaultDelegate(), 0, 0),
 	}
+	return initModel
 }
 
 // Init returns an initial command that performs some I/O.
 // No command is needed for now, so we return nil, which translates to no command.
+// TODO: make textinput.Blink work as soon as we're in the selectJobState
 func (m model) Init() tea.Cmd {
-
-	// nil means "no I/O for now, please"
 	return nil
 }
 
