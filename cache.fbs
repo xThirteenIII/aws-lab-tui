@@ -1,0 +1,5 @@
+table Cache {
+    jobs:[string];
+}
+
+root_type Cache;

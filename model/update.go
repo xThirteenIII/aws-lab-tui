@@ -8,6 +8,7 @@ import (
 // updateMainMenu updates the model when the user is in the main menu titlescreen.
 func (m model) updateMainMenu(msg tea.Msg) (tea.Model, tea.Cmd) {
 
+	// Main Menu Title
 	m.mainMenuList.Title = "Select the IoT Tool you want to use"
 
 	switch message := msg.(type) {
@@ -21,11 +22,17 @@ func (m model) updateMainMenu(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// close the program
 		case "ctrl+c", "q":
 			return m, tea.Quit
+
+		// go to selectIoTJob state when pressing enter
 		case "enter":
 			m.currentState = selectIoTJob
 			m.stateStack.Push(selectIoTJob)
 			m.initSelectJob()
 		}
+	// WindowSizeMsg is used to report the terminal size. It's sent to Update once
+	// initially and then on every terminal resize. Note that Windows does not
+	// have support for reporting when resizes occur as it does not support the
+	// SIGWINCH signal.
 	case tea.WindowSizeMsg:
 		h, v := docStyle.GetFrameSize()
 		m.mainMenuList.SetSize(message.Width-h, message.Height-v)
@@ -47,18 +54,25 @@ func (m model) updateSelectJob(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch message.String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
+
+		// Go back in the state history when pressing esc
 		case "esc":
 			m.stateStack.Pop()
 			m.currentState = m.stateStack.Peek()
+		case "enter":
+			m.suggestions.addJobSuggestion(m.input.Prompt)
 		}
 	}
 
+	// call updateInputs to update input typing
 	cmd := m.updateInputs(msg)
 	return m, cmd
 }
 
 func (m *model) updateInputs(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
+
+	// Update is the Bubble Tea update loop.
 	m.input, cmd = m.input.Update(msg)
 	return cmd
 }

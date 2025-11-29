@@ -11,4 +11,6 @@ func (m *model) initSelectJob() {
 	m.input.Focus()
 	m.input.PromptStyle = focusedStyle
 	m.input.TextStyle = focusedStyle
+	m.input.ShowSuggestions = true
+	m.input.SetSuggestions(m.suggestions.jobSuggestions)
 }

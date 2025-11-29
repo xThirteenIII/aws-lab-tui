@@ -21,7 +21,8 @@ type model struct {
 	mainMenuList list.Model // A lot of Bytes
 	input        textinput.Model
 
-	choices []string // items on the tool list, slice: 24B
+	choices     []string // items on the tool list, slice: 24B
+	suggestions suggestions
 	// stateStack is a Stack structure that holds states history
 	// It allows to go back and forth in the menu.
 	stateStack *stack.Stack[state] // states history, pointer: 8B
@@ -103,6 +104,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // Redrawing logic and stuff like that is taken care for by BubbleTea.
 func (m model) View() string {
 
+	// Update view based on current state of the app
 	switch m.currentState {
 	case mainMenu:
 		return m.viewMainMenu()
