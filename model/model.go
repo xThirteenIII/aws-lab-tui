@@ -8,29 +8,43 @@
 package model
 
 import (
+	"aws-iot-tui/stack"
 	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type model struct {
-	choices  []string         // items on the tool list
-	cursor   int              // which tool item the cursor is pointing at
-	selected map[int]struct{} // which tool items are selected
+
+	// stateStack is a Stack structure that holds states history
+	// It allows to go back and forth in the menu.
+	stateStack   *stack.Stack[state]
+	currentState state
+
+	choices []string // items on the tool list
+	cursor  int      // which tool item the cursor is pointing at
 }
 
 // initialModel defines the initial state of the application.
 // Defining a function to return the initial model, but could use a variable elsewhere, too.
 func InitialModel() model {
+	// initStack creates a new empty stack
+	initStack := stack.NewStack[state]()
+
+	// push mainMenu as default first state onto the Stack
+	initStack.Push(mainMenu)
 	return model{
+
+		// WARNING: to set the currentState is crucial, otherwise program will create unlimited goRoutines!
+		// runtime: goroutine stack exceeds 1000000000-byte limit
+		// runtime: sp=0xc020360390 stack=[0xc020360000, 0xc040360000] fatal error: stack overflow
+
+		// TODO:  Investigate why :D
+		currentState: mainMenu,
+		stateStack:   initStack,
 
 		// List all the IoT Tools usable with the app.
 		choices: []string{"Send IoT Jobs", "Dictionary", "Disenroll Inverter", "Upload .json to AWS S3"},
-
-		// A map which indicates which choices are selected.
-		// For now, only one choice is possible, for later states (e.g. Downloading commands from Dictionary), we can select multiples.
-		// The keys refer to the indexes of the "choices" slice, above.
-		selected: make(map[int]struct{}),
 	}
 }
 
@@ -53,61 +67,96 @@ func (m model) Init() tea.Cmd {
 // To figure out the type of message, use a type switch or a type assertion.
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
-	switch msg := msg.(type) {
+	// In which state are we currently in?
+	switch m.currentState {
 
-	// tea.KeyMsg are automatically sent to the Update function when keys are pressed.
-	// Is it a key press?
+	// In the main menu?
+	case mainMenu:
+		// Then call updateMainMenu and pass the current tea.Msg to it.
+		return m.updateMainMenu(msg)
+	case selectIoTJob:
+		// Then call updateSelectJob and pass the current tea.Msg to it.
+		return m.updateSelectJob(msg)
+	}
+
+	return m, nil
+}
+
+// updateMainMenu updates the model when the user is in the main menu titlescreen.
+func (m model) updateMainMenu(msg tea.Msg) (tea.Model, tea.Cmd) {
+
+	switch message := msg.(type) {
+
+	// Is the message a keyPress?
 	case tea.KeyMsg:
 
-		// Cool, what was the actual key pressed?
-		switch msg.String() {
+		// Cool, what key was pressed?
+		switch message.String() {
 
-		// These keys should exit the program
+		// close the program
 		case "ctrl+c", "q":
 			return m, tea.Quit
-
-		// The "up" and "k" keys move the cursor up.
+		// navigate up
+		// cursor is decremented even if counterintuitive!
+		//
+		// choices[0]
+		// choices[1]
+		// choices[2]
 		case "up", "k":
 			if m.cursor > 0 {
-
-				// Cursor goes back in the slice when moving up, not forward!
-				// [0]
-				// [1]
-				// [2]
 				m.cursor--
 			}
-
-		// The "down" and "j" keys move the cursor down.
+		// navigate down
 		case "down", "j":
 			if m.cursor < len(m.choices)-1 {
-
 				m.cursor++
 			}
-
-		// The "enter" key toggles
-		// the selected state for the item that the cursor is pointing at.
 		case "enter":
-			_, ok := m.selected[m.cursor]
-			if ok {
-				delete(m.selected, m.cursor)
-			} else {
-				m.selected[m.cursor] = struct{}{}
-			}
-
+			m.currentState = selectIoTJob
+			m.stateStack.Push(selectIoTJob)
 		}
 
 	}
 
-	// Return the updated model to the Bubble Tea runtime for processing.
-	// No tea.Cmd returned.
+	return m, nil
+}
+
+// updateSelectJob updates the model when the user is in the selectIoTJob state.
+func (m model) updateSelectJob(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch message := msg.(type) {
+
+	// Was a key pressed?
+	case tea.KeyMsg:
+
+		// Cool, which one?
+		switch message.String() {
+		case "ctrl+c", "q":
+			return m, tea.Quit
+		case "esc":
+			m.stateStack.Pop()
+			m.currentState = m.stateStack.Peek()
+		}
+	}
 	return m, nil
 }
 
 // View looks at the model at its current state, and returns a string, which is the updated UI!
 // Redrawing logic and stuff like that is taken care for by BubbleTea.
 func (m model) View() string {
+
+	switch m.currentState {
+	case mainMenu:
+		return m.viewMainMenu()
+	case selectIoTJob:
+		return m.viewSelectJob()
+	}
+	return ""
+}
+
+func (m model) viewMainMenu() string {
+
 	// The header
-	ui := "Select the IoT Tool you want to use\n\n"
+	mainMenu := "Select the IoT Tool you want to use\n\n"
 
 	// Iterate over choices
 	for i, choice := range m.choices {
@@ -118,19 +167,24 @@ func (m model) View() string {
 			cursor = ">" // cursor!
 		}
 
-		// Is this choice selected?
-		checked := " " // not slected
-		if _, ok := m.selected[i]; ok {
-			checked = "x" // selected
-		}
-
 		// render the row
-		ui += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
+		mainMenu += fmt.Sprintf("%s %s\n", cursor, choice)
 	}
 
 	// The footer
-	ui += "\nPress q to quit.\n"
+	mainMenu += "\nPress q to quit.\n"
 
 	// send the UI for rendering
-	return ui
+	return mainMenu
+}
+
+func (m model) viewSelectJob() string {
+
+	// The header
+	selectJobMenu := "Type the name you want to give to the IoT Job\n\n"
+
+	selectJobMenu += "\nPress q to quit. Esc to back.\n"
+
+	// send the UI for rendering
+	return selectJobMenu
 }
