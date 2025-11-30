@@ -5,12 +5,23 @@ import (
 )
 
 func (m *model) initSelectJob() {
-	m.input = textinput.New()
-	m.input.Cursor.Style = cursorStyle
-	m.input.CharLimit = 99
-	m.input.Focus()
-	m.input.PromptStyle = focusedStyle
-	m.input.TextStyle = focusedStyle
-	m.input.ShowSuggestions = true
-	m.suggestions.fileName = "cache.bin"
+	m.jobInput = textinput.New()
+	m.jobInput.Cursor.Style = cursorStyle
+	m.jobInput.CharLimit = 99
+	m.jobInput.Focus()
+	m.jobInput.PromptStyle = focusedStyle
+	m.jobInput.TextStyle = focusedStyle
+	m.jobInput.ShowSuggestions = true
+	m.suggestions.cacheFile = "cache.bin"
+}
+
+func (m *model) initSelectThing() {
+	m.thingInput = textinput.New()
+	m.thingInput.Cursor.Style = cursorStyle
+	m.thingInput.CharLimit = 17
+	m.thingInput.Focus()
+	m.thingInput.PromptStyle = focusedStyle
+	m.thingInput.TextStyle = focusedStyle
+	m.thingInput.ShowSuggestions = true
+	m.suggestions.cacheFile = "cache.bin"
 }

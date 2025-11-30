@@ -19,9 +19,9 @@ import (
 type model struct {
 	// list represents a list of items to show.
 	mainMenuList list.Model // A lot of Bytes
-	input        textinput.Model
+	jobInput     textinput.Model
+	thingInput   textinput.Model
 
-	choices     []string // items on the tool list, slice: 24B
 	suggestions suggestions
 	// stateStack is a Stack structure that holds states history
 	// It allows to go back and forth in the menu.
@@ -51,9 +51,6 @@ func InitialModel() model {
 		// TODO:  Investigate why :D
 		currentState: mainMenu,
 		stateStack:   initStack,
-
-		// List all the IoT Tools usable with the app.
-		choices: []string{"Send IoT Jobs", "Dictionary", "Disenroll Inverter", "Upload .json to AWS S3"},
 
 		mainMenuList: list.New(
 			[]list.Item{
@@ -95,6 +92,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case selectIoTJob:
 		// Then call updateSelectJob and pass the current tea.Msg to it.
 		return m.updateSelectJob(msg)
+	case selectThing:
+		return m.updateSelectThing(msg)
 	}
 
 	return m, nil
@@ -110,6 +109,8 @@ func (m model) View() string {
 		return m.viewMainMenu()
 	case selectIoTJob:
 		return m.viewSelectJob()
+	case selectThing:
+		return m.viewSelectThing()
 	}
 	return ""
 }
