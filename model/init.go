@@ -12,5 +12,5 @@ func (m *model) initSelectJob() {
 	m.input.PromptStyle = focusedStyle
 	m.input.TextStyle = focusedStyle
 	m.input.ShowSuggestions = true
-	m.input.SetSuggestions(m.suggestions.jobSuggestions)
+	m.suggestions.fileName = "cache.bin"
 }
