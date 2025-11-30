@@ -2,6 +2,8 @@
 package model
 
 import (
+	"net"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -45,7 +47,8 @@ func (m model) updateMainMenu(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // updateSelectJob updates the model when the user is in the selectIoTJob state.
 func (m model) updateSelectJob(msg tea.Msg) (tea.Model, tea.Cmd) {
-	m.input.SetSuggestions(m.suggestions.jobSuggestions)
+	m.suggestions.loadFromCache()
+	m.jobInput.SetSuggestions(m.suggestions.jobSuggestions)
 	switch message := msg.(type) {
 
 	// Was a key pressed?
@@ -61,8 +64,48 @@ func (m model) updateSelectJob(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.stateStack.Pop()
 			m.currentState = m.stateStack.Peek()
 		case "enter":
-			m.suggestions.addJobSuggestion(m.input.Value())
-			m.input.SetSuggestions(m.suggestions.jobSuggestions)
+			m.suggestions.addJobSuggestion(m.jobInput.Value())
+			m.jobInput.SetSuggestions(m.suggestions.jobSuggestions)
+
+			m.currentState = selectThing
+			m.stateStack.Push(selectThing)
+			m.initSelectThing()
+		}
+	}
+
+	// call updateInputs to update input typing
+	cmd := m.updateInputs(msg)
+	return m, cmd
+}
+
+// updateSelectJob updates the model when the user is in the selectIoTJob state.
+func (m model) updateSelectThing(msg tea.Msg) (tea.Model, tea.Cmd) {
+	m.thingInput.SetSuggestions(m.suggestions.macSuggestions)
+	switch message := msg.(type) {
+
+	// Was a key pressed?
+	case tea.KeyMsg:
+
+		// Cool, which one?
+		switch message.String() {
+		case "ctrl+c", "q":
+			return m, tea.Quit
+
+		// Go back in the state history when pressing esc
+		case "esc":
+			m.stateStack.Pop()
+			m.currentState = m.stateStack.Peek()
+		case "enter":
+			// We do not use input.Validate() for now
+			// Because don't know what to do with Model.Err field
+			_, err := net.ParseMAC(m.thingInput.Value())
+			if err != nil {
+				m.initSelectThing()
+				m.currentState = selectThing
+				break
+			}
+			m.suggestions.addMacSuggestion(m.thingInput.Value())
+			m.thingInput.SetSuggestions(m.suggestions.macSuggestions)
 		}
 	}
 
@@ -75,6 +118,8 @@ func (m *model) updateInputs(msg tea.Msg) tea.Cmd {
 	var cmd tea.Cmd
 
 	// Update is the Bubble Tea update loop.
-	m.input, cmd = m.input.Update(msg)
+	// TODO: useless to update both inputs, need to be refactored
+	m.jobInput, cmd = m.jobInput.Update(msg)
+	m.thingInput, cmd = m.thingInput.Update(msg)
 	return cmd
 }
