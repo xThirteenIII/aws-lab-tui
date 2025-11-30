@@ -1,5 +1,6 @@
 table Cache {
     jobs:[string];
+    macs:[string];
 }
 
 root_type Cache;
