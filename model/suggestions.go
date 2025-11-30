@@ -14,7 +14,6 @@ type suggestions struct {
 }
 
 func (s *suggestions) addJobSuggestion(sug string) {
-	s.jobSuggestions = nil //reset list
 	s.loadFromCache()
 
 	// Create a new slice of strings and add the new job suggestion at the head
@@ -29,7 +28,6 @@ func (s *suggestions) addJobSuggestion(sug string) {
 }
 
 func (s *suggestions) addMacSuggestion(sug string) {
-	s.macSuggestions = nil //reset list
 	s.loadFromCache()
 
 	// Create a new slice of strings and add the new mac suggestion at the head
@@ -44,6 +42,11 @@ func (s *suggestions) addMacSuggestion(sug string) {
 }
 
 func (s *suggestions) loadFromCache() {
+
+	// These two assignments make sure the cache.bin file does not get read and written everytime over
+	// and over.
+	s.jobSuggestions = nil
+	s.macSuggestions = nil
 	data, err := os.ReadFile(s.cacheFile)
 	if err != nil || len(data) == 0 {
 		return // return if file does not exist or it's empty

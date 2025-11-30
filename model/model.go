@@ -29,6 +29,9 @@ type model struct {
 
 	currentState state // int: 8B
 
+	// err holds the error to be displayed at screen
+	err string
+
 	cursor int // which tool item the cursor is pointing at, int: 8B
 }
 
@@ -61,6 +64,12 @@ func InitialModel() model {
 			},
 			list.NewDefaultDelegate(), 0, 0),
 	}
+	initModel.suggestions.cacheFile = "cache.bin"
+	initModel.suggestions.loadFromCache()
+	initModel.jobInput.SetSuggestions(initModel.suggestions.jobSuggestions)
+	initModel.thingInput.SetSuggestions(initModel.suggestions.macSuggestions)
+	initModel.initSelectJob()
+	initModel.initSelectThing()
 	return initModel
 }
 

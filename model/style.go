@@ -24,6 +24,7 @@ var (
 	cursorStyle         = focusedStyle
 	noStyle             = lipgloss.NewStyle()
 	helpStyle           = blurredStyle
+	errStyle            = lipgloss.NewStyle().Foreground(lipgloss.Color("#F54927"))
 	cursorModeHelpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
 
 	focusedButton = focusedStyle.Render("[ Submit ]")

@@ -12,7 +12,6 @@ func (m *model) initSelectJob() {
 	m.jobInput.PromptStyle = focusedStyle
 	m.jobInput.TextStyle = focusedStyle
 	m.jobInput.ShowSuggestions = true
-	m.suggestions.cacheFile = "cache.bin"
 }
 
 func (m *model) initSelectThing() {
@@ -23,5 +22,4 @@ func (m *model) initSelectThing() {
 	m.thingInput.PromptStyle = focusedStyle
 	m.thingInput.TextStyle = focusedStyle
 	m.thingInput.ShowSuggestions = true
-	m.suggestions.cacheFile = "cache.bin"
 }

@@ -17,6 +17,8 @@ func (m model) viewSelectJob() string {
 	b.WriteString("Type the IoT Job name\n\n")
 	b.WriteString(m.jobInput.View())
 	b.WriteString("\n\n\n")
+	b.WriteString(m.err)
+	b.WriteString("\n")
 	b.WriteString(helpStyle.Render("esc: go back | "))
 	b.WriteString(helpStyle.Render("enter: submit name"))
 
@@ -33,6 +35,8 @@ func (m model) viewSelectThing() string {
 	b.WriteString("Type the mac address of the Thing\n\n")
 	b.WriteString(m.thingInput.View())
 	b.WriteString("\n\n\n")
+	b.WriteString(errStyle.Render(m.err))
+	b.WriteString("\n")
 	b.WriteString(helpStyle.Render("esc: go back | "))
 	b.WriteString(helpStyle.Render("enter: submit mac"))
 
