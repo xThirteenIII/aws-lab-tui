@@ -45,6 +45,7 @@ func (m model) updateMainMenu(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // updateSelectJob updates the model when the user is in the selectIoTJob state.
 func (m model) updateSelectJob(msg tea.Msg) (tea.Model, tea.Cmd) {
+	m.input.SetSuggestions(m.suggestions.jobSuggestions)
 	switch message := msg.(type) {
 
 	// Was a key pressed?
@@ -60,7 +61,8 @@ func (m model) updateSelectJob(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.stateStack.Pop()
 			m.currentState = m.stateStack.Peek()
 		case "enter":
-			m.suggestions.addJobSuggestion(m.input.Prompt)
+			m.suggestions.addJobSuggestion(m.input.Value())
+			m.input.SetSuggestions(m.suggestions.jobSuggestions)
 		}
 	}
 
