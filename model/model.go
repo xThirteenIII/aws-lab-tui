@@ -101,6 +101,8 @@ func InitialModel() model {
 				item{title: "Upload to S3"},
 			},
 			list.NewDefaultDelegate(), 0, 0),
+		s3FilesLoadedChannel: make(chan []string),
+		errorChannel:         make(chan error),
 	}
 	initModel.suggestions.cacheFile = "cache.bin"
 	initModel.suggestions.loadFromCache()
