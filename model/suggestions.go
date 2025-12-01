@@ -20,8 +20,8 @@ func (s *suggestions) addJobSuggestion(sug string) {
 	s.jobSuggestions = append([]string{sug}, s.jobSuggestions...)
 
 	// Limit to 100 records
-	if len(s.jobSuggestions) > 100 {
-		s.jobSuggestions = s.jobSuggestions[:100]
+	if len(s.jobSuggestions) > 50 {
+		s.jobSuggestions = s.jobSuggestions[:50]
 	}
 
 	s.saveToCache()
@@ -34,8 +34,8 @@ func (s *suggestions) addMacSuggestion(sug string) {
 	s.macSuggestions = append([]string{sug}, s.macSuggestions...)
 
 	// Limit to 100 records
-	if len(s.macSuggestions) > 100 {
-		s.macSuggestions = s.macSuggestions[:100]
+	if len(s.macSuggestions) > 50 {
+		s.macSuggestions = s.macSuggestions[:50]
 	}
 
 	s.saveToCache()
