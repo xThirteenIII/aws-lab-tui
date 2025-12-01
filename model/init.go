@@ -23,3 +23,9 @@ func (m *model) initSelectThing() {
 	m.thingInput.TextStyle = focusedStyle
 	m.thingInput.ShowSuggestions = true
 }
+
+func (m *model) initSelectS3File() {
+	// Set view size
+	h, v := docStyle.GetFrameSize()
+	m.s3FilesList.SetSize(m.width-h, m.height-v)
+}
