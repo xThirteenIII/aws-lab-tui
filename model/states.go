@@ -6,4 +6,5 @@ const (
 	mainMenu state = iota + 1
 	selectIoTJob
 	selectThing
+	selectS3File
 )
