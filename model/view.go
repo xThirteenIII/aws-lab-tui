@@ -1,7 +1,9 @@
 // Here are all the view functions for each different state
 package model
 
-import "strings"
+import (
+	"strings"
+)
 
 func (m model) viewMainMenu() string {
 

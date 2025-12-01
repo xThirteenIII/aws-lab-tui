@@ -27,9 +27,16 @@ func (m model) updateMainMenu(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// go to selectIoTJob state when pressing enter
 		case "enter":
-			m.currentState = selectIoTJob
-			m.stateStack.Push(selectIoTJob)
-			m.initSelectJob()
+
+			// enter different states based on the current cursor value
+			// 0 -> IotJob
+			// 1 -> Dictionary
+			switch m.mainMenuList.Cursor() {
+			case 0:
+				m.currentState = selectIoTJob
+				m.stateStack.Push(selectIoTJob)
+				m.initSelectJob()
+			}
 		}
 	// WindowSizeMsg is used to report the terminal size. It's sent to Update once
 	// initially and then on every terminal resize. Note that Windows does not
