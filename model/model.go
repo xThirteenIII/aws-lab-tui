@@ -17,10 +17,14 @@ import (
 
 // Order struct from biggest Bytes to lowest, to minimize padding and optimize memory.
 type model struct {
-	// list represents a list of items to show.
+	// mainMenuList holds each usable tool in the main menu
 	mainMenuList list.Model // A lot of Bytes
-	jobInput     textinput.Model
-	thingInput   textinput.Model
+
+	// s3FilesList is a list of items from a S3 bucket
+	s3FilesList list.Model
+
+	jobInput   textinput.Model
+	thingInput textinput.Model
 
 	suggestions suggestions
 	// stateStack is a Stack structure that holds states history
