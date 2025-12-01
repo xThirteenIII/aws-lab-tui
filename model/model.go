@@ -34,6 +34,12 @@ type model struct {
 
 	currentState state // int: 8B
 
+	s3NavigationStack *stack.Stack[string]
+
+	// channels
+	s3FilesLoadedChannel chan []string
+	errorChannel         chan error
+
 	// err holds the error to be displayed at screen
 	err string
 }
