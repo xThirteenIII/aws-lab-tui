@@ -43,12 +43,58 @@ func (m model) updateMainMenu(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// have support for reporting when resizes occur as it does not support the
 	// SIGWINCH signal.
 	case tea.WindowSizeMsg:
+
+		m.width = message.Width
+		m.height = message.Height
+		// GetFrameSize returns the sum of the margins, padding and border width for
+		// both the horizontal and vertical margins.
 		h, v := docStyle.GetFrameSize()
-		m.mainMenuList.SetSize(message.Width-h, message.Height-v)
+		m.mainMenuList.SetSize(m.width-h, m.height-v)
 	}
 
 	var cmd tea.Cmd
 	m.mainMenuList, cmd = m.mainMenuList.Update(msg)
+	return m, cmd
+}
+
+// updateS3List updates the model when the user is in the s3FilesList state
+func (m model) updateS3List(msg tea.Msg) (tea.Model, tea.Cmd) {
+
+	// Main Menu Title
+	m.s3FilesList.Title = "Select the JSON file Document"
+
+	switch message := msg.(type) {
+
+	// Is the message a keyPress?
+	case tea.KeyMsg:
+
+		// Cool, what key was pressed?
+		switch message.String() {
+
+		// close the program
+		case "ctrl+c", "q":
+			return m, tea.Quit
+
+		// go to selectIoTJob state when pressing enter
+		case "esc":
+			m.stateStack.Pop()
+			m.currentState = m.stateStack.Peek()
+		case "enter":
+
+			// enter different states based on the current cursor value
+			// 0 -> IotJob
+			// 1 -> Dictionary
+			switch m.s3FilesList.Cursor() {
+			case 0:
+				m.currentState = selectIoTJob
+				m.stateStack.Push(selectIoTJob)
+				m.initSelectJob()
+			}
+		}
+	}
+
+	var cmd tea.Cmd
+	m.s3FilesList, cmd = m.s3FilesList.Update(msg)
 	return m, cmd
 }
 
@@ -113,6 +159,11 @@ func (m model) updateSelectThing(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.suggestions.addMacSuggestion(m.thingInput.Value())
 			m.thingInput.SetSuggestions(m.suggestions.macSuggestions)
+			m.currentState = selectS3File
+			m.stateStack.Push(selectS3File)
+
+			// init here is much faster then calling this in the updateS3List
+			m.initSelectS3File()
 		}
 	}
 
