@@ -10,6 +10,11 @@ func (m model) viewMainMenu() string {
 	return docStyle.Render(m.mainMenuList.View())
 }
 
+func (m model) viewS3List() string {
+
+	return docStyle.Render(m.s3FilesList.View())
+}
+
 func (m model) viewSelectJob() string {
 
 	// A Builder is used to efficiently build a string using [Builder.Write] methods.
