@@ -29,14 +29,13 @@ type model struct {
 	suggestions suggestions
 	// stateStack is a Stack structure that holds states history
 	// It allows to go back and forth in the menu.
-	stateStack *stack.Stack[state] // states history, pointer: 8B
+	stateStack    *stack.Stack[state] // states history, pointer: 8B
+	width, height int
 
 	currentState state // int: 8B
 
 	// err holds the error to be displayed at screen
 	err string
-
-	cursor int // which tool item the cursor is pointing at, int: 8B
 }
 
 // initialModel defines the initial state of the application.
@@ -65,6 +64,35 @@ func InitialModel() model {
 				item{title: "Dictionary", desc: "Download commands from HeidiDB database, in js format"},
 				item{title: "Disenroll Inverter", desc: "Disenroll an Haier Inverter from database and dynamoDB"},
 				item{title: "Upload to S3", desc: "Select a new firmware version and upload its .json files to S3"},
+			},
+			list.NewDefaultDelegate(), 0, 0),
+
+		s3FilesList: list.New(
+			[]list.Item{
+				item{title: "Iot Jobs"},
+				item{title: "Dictionary"},
+				item{title: "Disenroll Inverter"},
+				item{title: "Upload to S3"},
+				item{title: "Iot Jobs"},
+				item{title: "Dictionary"},
+				item{title: "Disenroll Inverter"},
+				item{title: "Upload to S3"},
+				item{title: "Iot Jobs"},
+				item{title: "Dictionary"},
+				item{title: "Disenroll Inverter"},
+				item{title: "Upload to S3"},
+				item{title: "Iot Jobs"},
+				item{title: "Dictionary"},
+				item{title: "Disenroll Inverter"},
+				item{title: "Upload to S3"},
+				item{title: "Iot Jobs"},
+				item{title: "Dictionary"},
+				item{title: "Disenroll Inverter"},
+				item{title: "Upload to S3"},
+				item{title: "Iot Jobs"},
+				item{title: "Dictionary"},
+				item{title: "Disenroll Inverter"},
+				item{title: "Upload to S3"},
 			},
 			list.NewDefaultDelegate(), 0, 0),
 	}
@@ -96,7 +124,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// In which state are we currently in?
 	switch m.currentState {
 
-	// In the main menu?
 	case mainMenu:
 		// Then call updateMainMenu and pass the current tea.Msg to it.
 		return m.updateMainMenu(msg)
@@ -105,6 +132,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updateSelectJob(msg)
 	case selectThing:
 		return m.updateSelectThing(msg)
+	case selectS3File:
+		return m.updateS3List(msg)
 	}
 
 	return m, nil
@@ -122,6 +151,8 @@ func (m model) View() string {
 		return m.viewSelectJob()
 	case selectThing:
 		return m.viewSelectThing()
+	case selectS3File:
+		return m.viewS3List()
 	}
 	return ""
 }
