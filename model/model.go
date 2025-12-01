@@ -66,8 +66,6 @@ func InitialModel() model {
 	}
 	initModel.suggestions.cacheFile = "cache.bin"
 	initModel.suggestions.loadFromCache()
-	initModel.jobInput.SetSuggestions(initModel.suggestions.jobSuggestions)
-	initModel.thingInput.SetSuggestions(initModel.suggestions.macSuggestions)
 	initModel.initSelectJob()
 	initModel.initSelectThing()
 	return initModel

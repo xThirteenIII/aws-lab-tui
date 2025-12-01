@@ -77,6 +77,7 @@ func (m model) updateSelectJob(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // updateSelectJob updates the model when the user is in the selectIoTJob state.
 func (m model) updateSelectThing(msg tea.Msg) (tea.Model, tea.Cmd) {
+	m.thingInput.SetSuggestions(m.suggestions.macSuggestions)
 	switch message := msg.(type) {
 
 	// Was a key pressed?

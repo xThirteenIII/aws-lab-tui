@@ -41,6 +41,10 @@ func (s *suggestions) addMacSuggestion(sug string) {
 	s.saveToCache()
 }
 
+// WARNING: for now, we read and re-write the whole cache.bin file.
+//
+//	We can do it since flatBuffer performance is not affected, only 100 records in our fb.
+//	If the file is *K or 10*K +, then we can start reading and writing only necessary parts.
 func (s *suggestions) loadFromCache() {
 
 	// These two assignments make sure the cache.bin file does not get read and written everytime over
