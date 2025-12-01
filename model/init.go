@@ -1,6 +1,8 @@
 package model
 
 import (
+	"time"
+
 	"github.com/charmbracelet/bubbles/textinput"
 )
 
@@ -12,6 +14,7 @@ func (m *model) initSelectJob() {
 	m.jobInput.PromptStyle = focusedStyle
 	m.jobInput.TextStyle = focusedStyle
 	m.jobInput.ShowSuggestions = true
+	m.jobInput.SetValue(time.Now().Format("20060201"))
 }
 
 func (m *model) initSelectThing() {
