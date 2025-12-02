@@ -5,6 +5,8 @@ import (
 	"os"
 )
 
+// MustEnv returns the value corresponding to the key passed as parameter.
+// It returns an error if the key is missing from the .env file.
 func MustEnv(key string) (string, error) {
 
 	// Is the key in the file?
