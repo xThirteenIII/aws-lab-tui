@@ -15,7 +15,11 @@ func (m *model) loadS3Files() tea.Cmd {
 			return nil
 		}
 
-		//s3Client := s3.NewFromConfig(awsConf)
+		s3Client := s3.NewFromConfig(awsConf)
+
+		listObjectInput := &s3.ListObjectsV2Input{
+			Bucket: aws.String(),
+		}
 	*/
 	return nil
 }
