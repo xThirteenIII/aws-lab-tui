@@ -34,7 +34,7 @@ type model struct {
 
 	currentState state // int: 8B
 
-	s3NavigationStack *stack.Stack[string]
+	s3PathStack *stack.Stack[string]
 
 	// channels
 	s3FilesLoadedChannel chan []string
@@ -50,6 +50,7 @@ func InitialModel() model {
 
 	// initStack creates a new empty stack
 	initStack := stack.NewStack[state]()
+	initS3Path := stack.NewStack[string]()
 
 	// push mainMenu as default first state onto the Stack
 	initStack.Push(mainMenu)
