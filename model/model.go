@@ -13,6 +13,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/joho/godotenv"
 )
 
 // Order struct from biggest Bytes to lowest, to minimize padding and optimize memory.
@@ -64,6 +65,7 @@ func InitialModel() model {
 		// TODO:  Investigate why :D
 		currentState: mainMenu,
 		stateStack:   initStack,
+		s3PathStack:  initS3Path,
 
 		mainMenuList: list.New(
 			[]list.Item{
@@ -109,6 +111,19 @@ func InitialModel() model {
 	initModel.suggestions.loadFromCache()
 	initModel.initSelectJob()
 	initModel.initSelectThing()
+
+	// Load env vars used in the whole program from .env file
+	if err := godotenv.Load(); err != nil {
+		initModel.err = err.Error()
+	}
+
+	s3_root_path, err := MustEnv("S3_ROOT_PATH")
+	if err != nil {
+		initModel.err = err.Error()
+	}
+
+	// Push root s3 path
+	initModel.s3PathStack.Push(s3_root_path)
 	return initModel
 }
 

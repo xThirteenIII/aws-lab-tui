@@ -1,24 +1,22 @@
 package model
 
 import (
-	"context"
-
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 // GetS3Files returns a tea.Cmd and a string for the error
 func (m *model) loadS3Files() tea.Cmd {
 
-	// awsConf reads in the .aws user folder
-	awsConf, err := config.LoadDefaultConfig(context.TODO())
-	if err != nil {
-		m.errorChannel <- err
-		return nil
-	}
+	/*
+		// awsConf reads in the .aws user folder
+		awsConf, err := config.LoadDefaultConfig(context.TODO())
+		if err != nil {
+			m.errorChannel <- err
+			return nil
+		}
 
-	s3Client := s3.NewFromConfig(awsConf)
+		//s3Client := s3.NewFromConfig(awsConf)
+	*/
 	return nil
 }
 
