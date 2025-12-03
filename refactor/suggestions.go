@@ -1,4 +1,4 @@
-package model
+package refactor
 
 import (
 	"aws-iot-tui/cache"
@@ -7,19 +7,21 @@ import (
 	flatbuffers "github.com/google/flatbuffers/go"
 )
 
+// suggestions holds job and mac suggestions, and the cache file name
 type suggestions struct {
 	jobSuggestions []string
 	macSuggestions []string
 	cacheFile      string
 }
 
+// addJobSuggestion prepend the new suggestion to the jobSuggestion slice
 func (s *suggestions) addJobSuggestion(sug string) {
 	s.loadFromCache()
 
 	// Create a new slice of strings and add the new job suggestion at the head
 	s.jobSuggestions = append([]string{sug}, s.jobSuggestions...)
 
-	// Limit to 100 records
+	// Limit to 50 records
 	if len(s.jobSuggestions) > 50 {
 		s.jobSuggestions = s.jobSuggestions[:50]
 	}
@@ -27,6 +29,7 @@ func (s *suggestions) addJobSuggestion(sug string) {
 	s.saveToCache()
 }
 
+// addJobSuggestion prepend the new suggestion to the macSuggestions slice
 func (s *suggestions) addMacSuggestion(sug string) {
 	s.loadFromCache()
 
@@ -97,6 +100,7 @@ func (s *suggestions) loadFromCache() {
 	}
 }
 
+// saveToCache creates a flatbuffer vector for suggestions and writes it to the cacheFile, as bytes
 func (s *suggestions) saveToCache() {
 
 	// Create an initial FlatBuffers builder of 1024 B
