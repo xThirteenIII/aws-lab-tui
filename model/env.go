@@ -1,4 +1,4 @@
-package refactor
+package model
 
 import (
 	"fmt"

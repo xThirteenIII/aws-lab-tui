@@ -1,7 +1,7 @@
 package main
 
 import (
-	"aws-iot-tui/refactor"
+	"aws-iot-tui/model"
 	"fmt"
 	"os"
 
@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	program := tea.NewProgram(refactor.InitialModel(), tea.WithAltScreen())
+	program := tea.NewProgram(model.InitialModel(), tea.WithAltScreen())
 	if _, err := program.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
