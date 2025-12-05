@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"fmt"
+	"path"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -14,7 +15,7 @@ import (
 // commands.go collects all asyncronous functions.
 
 // fetchS3FilesCmd returns a S3FilesMsg to be catched by Update() before entering S3 state.
-func fetchS3FilesCmd() tea.Cmd {
+func fetchS3FilesCmd(s string) tea.Cmd {
 
 	return func() tea.Msg {
 
@@ -28,15 +29,11 @@ func fetchS3FilesCmd() tea.Cmd {
 		}
 
 		// TODO: Load variables into a map when InitModel
-		s3RootPath, err := MustEnv("S3_ROOT_PATH")
 		s3Bucket, _ := MustEnv("S3_TEST_OTA_BUCKET")
-		if err != nil {
-			return ErrorMsg{Err: err}
-		}
 		s3Client := s3.NewFromConfig(awsConf)
 		listObjectsV2Input := &s3.ListObjectsV2Input{
 			Bucket:    aws.String(s3Bucket),
-			Prefix:    aws.String(s3RootPath),
+			Prefix:    aws.String(s),
 			Delimiter: aws.String("/"),
 		}
 
@@ -52,13 +49,13 @@ func fetchS3FilesCmd() tea.Cmd {
 
 		// Add folders
 		for _, folder := range listObjectsV2Output.CommonPrefixes {
-			newFolder := item{title: *folder.Prefix}
+			newFolder := item{title: path.Base(*folder.Prefix)}
 			files = append(files, newFolder)
 		}
 
 		// Add files
 		for _, file := range listObjectsV2Output.Contents {
-			newFile := item{title: *file.Key}
+			newFile := item{title: path.Base(*file.Key)}
 			files = append(files, newFile)
 		}
 

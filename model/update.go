@@ -3,6 +3,7 @@ package model
 import (
 	"net"
 
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -76,10 +77,10 @@ func (m Model) updateSelectThing(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.suggestions.addMacSuggestion(m.thingInput.Value())
 
 			// And change to S3 state
-			m.changeState(StateS3List)
+			m.changeState(StateSelectOp)
 
 			// return the updated model and a tea.Cmd that fetches S3 Files
-			return m, fetchS3FilesCmd()
+			return m, nil
 		}
 	}
 
@@ -90,9 +91,9 @@ func (m Model) updateSelectThing(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // updateS3List handles S3 events
 func (m Model) updateS3List(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
+	switch message := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
+		switch message.String() {
 		case "esc":
 			m.goBack()
 			return m, nil
@@ -105,13 +106,50 @@ func (m Model) updateS3List(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case S3FilesMsg:
 
 		// is s3List existing?
-		m.s3List.SetItems(msg.Files)
-		m.s3List.Title = "Select JSON Document"
+		m.s3List.StopSpinner()
+		if len(message.Files) == 0 {
+			m.s3List.SetItems([]list.Item{item{title: "no item fetched"}})
+		} else {
+			m.s3List.SetItems(message.Files)
+		}
 		h, v := docStyle.GetFrameSize()
 		m.s3List.SetSize(m.width-h, m.height-v)
 	}
 
 	var cmd tea.Cmd
 	m.s3List, cmd = m.s3List.Update(msg)
+	return m, cmd
+}
+
+// updateMainMenu handles MainMenu events
+func (m Model) updateSelectionOp(msg tea.Msg) (tea.Model, tea.Cmd) {
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "q":
+			return m, tea.Quit
+		case "esc":
+			m.goBack()
+			return m, nil
+		case "enter":
+			opMap := map[int]string{
+				0: "Campaign/EPP/",
+				1: "Campaign/EC3/",
+				2: "Campaign/ES3/",
+				3: "Campaign/DeepOTA/",
+				4: "Campaign/EEPROM/",
+				5: "Campaign/CEW/",
+				6: "/",
+			}
+			m.s3PathStack.Push(opMap[m.operationsList.Cursor()])
+			// And change to S3 state
+			m.changeState(StateS3List)
+			return m, fetchS3FilesCmd(opMap[m.operationsList.Cursor()])
+		}
+	}
+
+	var cmd tea.Cmd
+	m.operationsList, cmd = m.operationsList.Update(msg)
 	return m, cmd
 }

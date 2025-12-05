@@ -5,7 +5,10 @@ import (
 	"time"
 
 	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/joho/godotenv"
 )
 
@@ -28,13 +31,8 @@ func InitialModel() Model {
 		m.lastError = err.Error()
 	}
 
-	s3RootPath, err := MustEnv("S3_ROOT_PATH")
-	if err != nil {
-		m.lastError = err.Error()
-	}
-
 	// Push root s3 path
-	m.s3PathStack.Push(s3RootPath)
+	m.s3PathStack.Push("")
 
 	// Load suggestions from cache
 	m.suggestions.cacheFile = "cache.bin"
@@ -87,15 +85,46 @@ func (m *Model) initSelectThing() {
 }
 
 // initS3List inizializes S3 state data
-func (m *Model) initS3List() {
+func (m *Model) initS3List() tea.Cmd {
+	items := []list.Item{}
+
+	delegate := list.NewDefaultDelegate()
+	newSpinner := spinner.New()
+	newSpinner.Style = spinnerStyle
+	newSpinner.Spinner = spinner.Dot
+	m.s3List = list.New(items, delegate, 0, 0)
+	m.s3List.Title = "Select S3 Document"
+	// TODO: set item help
+
+	// TODO: figure out why spinner is not shown where the list is, but top right of the screen
+	h, v := docStyle.GetFrameSize()
+	newSpinner.Style.Align(lipgloss.Position(0))
+	m.s3List.SetSize(m.width-h, m.height-v)
+	m.s3List.SetSpinner(newSpinner.Spinner)
+
+	// To return a tea.Cmd might be useless
+	return m.s3List.StartSpinner()
+}
+
+// initMainMenu initializes main menu data
+func (m *Model) initSelectOp() {
 	items := []list.Item{
-		item{title: "Loading..."},
+		item{title: "EPP", desc: "Send an OTA to an ESP32 EPP microcontroller"},
+		item{title: "EC3", desc: "Send an OTA to an ESP32 EC3 microcontroller"},
+		item{title: "ES3", desc: "Send an OTA to an ESP32 ES3 microcontroller"},
+		item{title: "Deep OTA", desc: "Send a Deep OTA"},
+		item{title: "OTA EEPROM", desc: "Send an OTA EEPROM"},
+		item{title: "CEW OTA", desc: "Send an CEW OTA"},
+		item{title: "Other", desc: "Navigate S3 Bucket"},
 	}
 
 	delegate := list.NewDefaultDelegate()
-	m.s3List = list.New(items, delegate, 0, 0)
-	m.s3List.Title = "Select S3 File"
-
+	m.operationsList = list.New(items, delegate, 0, 0)
+	m.operationsList.Title = "Select the Operation you want to perform"
+	// Set lists size
+	// TODO: this has to be somewhere else, otherwise when all tools are developed,
+	// this will be a long list (no pun intended)
+	// WARNING: m.width and m.height MUST BE INITIALIZED before calling this
 	h, v := docStyle.GetFrameSize()
-	m.s3List.SetSize(m.width-h, m.height-v)
+	m.operationsList.SetSize(m.width-h, m.height-v)
 }

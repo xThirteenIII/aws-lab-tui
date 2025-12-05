@@ -33,8 +33,23 @@ func (m Model) viewSelectThing() string {
 	return docStyle.Render(b.String())
 }
 
+func (m Model) viewOpList() string {
+	var b strings.Builder
+	if m.lastError != "" {
+		b.WriteString(errStyle.Render(m.lastError))
+		b.WriteString("\n\n")
+	}
+	return docStyle.Render(m.operationsList.View())
+}
+
 func (m Model) viewS3List() string {
-	return docStyle.Render(m.s3List.View() + m.viewError())
+	var b strings.Builder
+	if m.lastError != "" {
+		b.WriteString(errStyle.Render(m.lastError))
+		b.WriteString("\n\n")
+	}
+	m.s3List.FullHelp()
+	return docStyle.Render(m.s3List.View() + b.String())
 }
 
 func (m Model) viewError() string {

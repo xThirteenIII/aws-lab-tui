@@ -8,16 +8,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// StateType rappresents the state type
-type StateType int
-
-const (
-	StateMainMenu StateType = iota
-	StateSelectJob
-	StateSelectThing
-	StateS3List
-)
-
 // Model is the main model of the application
 type Model struct {
 	// State handling
@@ -37,6 +27,9 @@ type Model struct {
 	jobInput    textinput.Model
 	thingInput  textinput.Model
 	suggestions suggestions
+
+	// Select Operation state
+	operationsList list.Model
 
 	// S3 state data
 	s3List      list.Model
@@ -142,6 +135,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updateSelectJob(msg)
 	case StateSelectThing:
 		return m.updateSelectThing(msg)
+	case StateSelectOp:
+		return m.updateSelectionOp(msg)
 	case StateS3List:
 		return m.updateS3List(msg)
 	}
@@ -160,6 +155,8 @@ func (m Model) View() string {
 		return m.viewSelectJob()
 	case StateSelectThing:
 		return m.viewSelectThing()
+	case StateSelectOp:
+		return m.viewOpList()
 	case StateS3List:
 		return m.viewS3List()
 	}
@@ -168,7 +165,7 @@ func (m Model) View() string {
 }
 
 // changeState changes current state and handles states
-func (m *Model) changeState(newState StateType) {
+func (m *Model) changeState(newState StateType) tea.Cmd {
 	// Push newState state onto stack
 	m.stateHistory.Push(newState)
 
@@ -178,9 +175,12 @@ func (m *Model) changeState(newState StateType) {
 		m.initSelectJob()
 	case StateSelectThing:
 		m.initSelectThing()
+	case StateSelectOp:
+		m.initSelectOp()
 	case StateS3List:
-		m.initS3List()
+		return m.initS3List()
 	}
+	return nil
 }
 
 // getCurrentState peeks at the state stack and returns its head (the current state)
