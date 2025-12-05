@@ -97,15 +97,18 @@ func (m Model) updateS3List(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.goBack()
 			return m, nil
 		case "enter":
-			// TODO: seleziona file e procedi
+			// TODO: select file
 			return m, nil
 		}
 
 		// Asyncrously catch S3 files
 	case S3FilesMsg:
-		// And update list items for S3 state
+
+		// is s3List existing?
 		m.s3List.SetItems(msg.Files)
-		return m, nil
+		m.s3List.Title = "Select JSON Document"
+		h, v := docStyle.GetFrameSize()
+		m.s3List.SetSize(m.width-h, m.height-v)
 	}
 
 	var cmd tea.Cmd

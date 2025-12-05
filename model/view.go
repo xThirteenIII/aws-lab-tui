@@ -34,5 +34,9 @@ func (m Model) viewSelectThing() string {
 }
 
 func (m Model) viewS3List() string {
-	return docStyle.Render(m.s3List.View())
+	return docStyle.Render(m.s3List.View() + m.viewError())
+}
+
+func (m Model) viewError() string {
+	return errStyle.Render(m.lastError)
 }

@@ -193,6 +193,6 @@ func (m *Model) getCurrentState() StateType {
 func (m *Model) goBack() {
 	if !m.stateHistory.IsEmpty() {
 		m.stateHistory.Pop()
-		m.lastError = "" // Reset error when going back
+		//m.lastError = "" // Reset error when going back
 	}
 }
