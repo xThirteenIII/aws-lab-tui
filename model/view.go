@@ -14,7 +14,10 @@ func (m Model) viewSelectJob() string {
 	b.WriteString("Type the IoT Job name\n\n")
 	b.WriteString(m.jobInput.View())
 	b.WriteString("\n\n")
-	b.WriteString(helpStyle.Render("esc → go back | enter → submit"))
+	b.WriteString(helpCmdStyle.Render("esc ") +
+		helpStyle.Render("back • ") +
+		helpCmdStyle.Render("enter ") +
+		helpStyle.Render("submit"))
 	return docStyle.Render(b.String())
 }
 
@@ -29,7 +32,10 @@ func (m Model) viewSelectThing() string {
 		b.WriteString("\n\n")
 	}
 
-	b.WriteString(helpStyle.Render("esc → go back | enter → submit"))
+	b.WriteString(helpCmdStyle.Render("esc ") +
+		helpStyle.Render("back • ") +
+		helpCmdStyle.Render("enter ") +
+		helpStyle.Render("submit"))
 	return docStyle.Render(b.String())
 }
 
@@ -48,10 +54,13 @@ func (m Model) viewS3List() string {
 		b.WriteString(errStyle.Render(m.lastError))
 		b.WriteString("\n\n")
 	}
-	m.s3List.FullHelp()
 	return docStyle.Render(m.s3List.View() + b.String())
 }
 
 func (m Model) viewError() string {
 	return errStyle.Render(m.lastError)
+}
+
+func (m Model) viewSendJob() string {
+	return docStyle.Render("sending job")
 }

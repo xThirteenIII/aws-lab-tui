@@ -9,4 +9,5 @@ const (
 	StateSelectThing
 	StateSelectOp
 	StateS3List
+	StateSendJob
 )

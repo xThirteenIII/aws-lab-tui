@@ -11,3 +11,7 @@ type ErrorMsg struct {
 type S3FilesMsg struct {
 	Files []list.Item
 }
+
+type IoTJobMsg struct {
+	Document string
+}

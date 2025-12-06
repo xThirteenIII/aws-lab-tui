@@ -2,6 +2,8 @@ package model
 
 import (
 	"net"
+	"path"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -89,6 +91,44 @@ func (m Model) updateSelectThing(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+// updateMainMenu handles MainMenu events
+func (m Model) updateSelectionOp(msg tea.Msg) (tea.Model, tea.Cmd) {
+
+	switch message := msg.(type) {
+	case tea.KeyMsg:
+		switch message.String() {
+		case "q":
+			return m, tea.Quit
+		case "esc":
+			m.goBack()
+			return m, nil
+		case "enter":
+
+			// Submit user selection only if user is not filtering.
+			// If the user is filterin, enter is used to accept the filter value.
+			if !m.operationsList.SettingFilter() {
+				opMap := map[int]string{
+					0: "Campaign/EPP/",
+					1: "Campaign/EC3/",
+					2: "Campaign/ES3/",
+					3: "Campaign/DeepOTA/",
+					4: "Campaign/EEPROM/",
+					5: "Campaign/CEW/",
+					6: "",
+				}
+				m.s3PathStack.Push(opMap[m.operationsList.Cursor()])
+				// And change to S3 state, this inits the s3 List
+				m.changeState(StateS3List)
+				return m, fetchS3FilesCmd(opMap[m.operationsList.Cursor()])
+			}
+		}
+	}
+
+	var cmd tea.Cmd
+	m.operationsList, cmd = m.operationsList.Update(msg)
+	return m, cmd
+}
+
 // updateS3List handles S3 events
 func (m Model) updateS3List(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch message := msg.(type) {
@@ -97,19 +137,50 @@ func (m Model) updateS3List(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "esc":
 			m.goBack()
 			return m, nil
+		case "b":
+			m.s3PathStack.Pop()
+			// Fetch files into that folder
+			return m, fetchS3FilesCmd(m.s3PathStack.Peek())
 		case "enter":
 			// TODO: select file
-			return m, nil
+			// Check if selected item is a json file
+			// Selected item is the last element in the Stack
+			if !m.s3List.SettingFilter() {
+				if strings.HasSuffix(m.s3List.SelectedItem().(item).title, ".json") {
+					m.changeState(StateSendJob)
+					// send job here
+					return m, nil
+				} else {
+					// Push completePath+selected folder into the path stack
+					lastEl := m.s3PathStack.Peek()
+					// WARNING: if paginator takes more than 1 page, Cursor() value is
+					// always 0 < Cursor.value < len(page)
+					// use SelectedItem() to return the item selected
+					m.s3PathStack.Push(lastEl + m.s3List.SelectedItem().(item).title + "/")
+					// Fetch files into that folder
+					return m, fetchS3FilesCmd(m.s3PathStack.Peek())
+				}
+			}
 		}
 
 		// Asyncrously catch S3 files
 	case S3FilesMsg:
 
-		// is s3List existing?
-		m.s3List.StopSpinner()
+		// Reset List of Items everytime something is fetched from S3
+		// This is necessary to reset cursor, pagination and everything related to it
+		m.initS3List()
+
+		// Are there no files?
 		if len(message.Files) == 0 {
+			// Then show it
 			m.s3List.SetItems([]list.Item{item{title: "no item fetched"}})
 		} else {
+
+			// Show just base path in the list, for cleaner UI
+			basePaths := []string{}
+			for _, file := range message.Files {
+				basePaths = append(basePaths, path.Base(file.(item).title))
+			}
 			m.s3List.SetItems(message.Files)
 		}
 		h, v := docStyle.GetFrameSize()
@@ -121,35 +192,19 @@ func (m Model) updateS3List(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-// updateMainMenu handles MainMenu events
-func (m Model) updateSelectionOp(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model) updateSendJob(msg tea.Msg) (tea.Model, tea.Cmd) {
 
-	switch msg := msg.(type) {
+	switch message := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "q":
+		switch message.String() {
+		case "ctrl+c":
 			return m, tea.Quit
-		case "esc":
-			m.goBack()
-			return m, nil
-		case "enter":
-			opMap := map[int]string{
-				0: "Campaign/EPP/",
-				1: "Campaign/EC3/",
-				2: "Campaign/ES3/",
-				3: "Campaign/DeepOTA/",
-				4: "Campaign/EEPROM/",
-				5: "Campaign/CEW/",
-				6: "/",
-			}
-			m.s3PathStack.Push(opMap[m.operationsList.Cursor()])
-			// And change to S3 state
-			m.changeState(StateS3List)
-			return m, fetchS3FilesCmd(opMap[m.operationsList.Cursor()])
+			// cancel job
+
 		}
+	case IoTJobMsg:
+		// monitorJob
 	}
 
-	var cmd tea.Cmd
-	m.operationsList, cmd = m.operationsList.Update(msg)
-	return m, cmd
+	return m, nil
 }

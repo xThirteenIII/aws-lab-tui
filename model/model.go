@@ -34,6 +34,9 @@ type Model struct {
 	// S3 state data
 	s3List      list.Model
 	s3PathStack *stack.Stack[string]
+
+	// IoT Job data
+	document string
 }
 
 // Init returns an initial command that performs some I/O.
@@ -139,6 +142,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updateSelectionOp(msg)
 	case StateS3List:
 		return m.updateS3List(msg)
+	case StateSendJob:
+		return m, nil
 	}
 
 	return m, nil
@@ -159,6 +164,8 @@ func (m Model) View() string {
 		return m.viewOpList()
 	case StateS3List:
 		return m.viewS3List()
+	case StateSendJob:
+		return m.viewSendJob()
 	}
 
 	return ""
@@ -178,7 +185,9 @@ func (m *Model) changeState(newState StateType) tea.Cmd {
 	case StateSelectOp:
 		m.initSelectOp()
 	case StateS3List:
-		return m.initS3List()
+		m.initS3List()
+	case StateSendJob:
+		m.initSendJob()
 	}
 	return nil
 }

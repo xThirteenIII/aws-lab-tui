@@ -59,6 +59,12 @@ func fetchS3FilesCmd(s string) tea.Cmd {
 			files = append(files, newFile)
 		}
 
-		return S3FilesMsg{Files: files}
+		// Return files but not the first one, which is the current folder.
+		return S3FilesMsg{Files: files[1:]}
 	}
+}
+
+func sendIoTJob() tea.Cmd {
+
+	return nil
 }

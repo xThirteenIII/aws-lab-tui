@@ -5,10 +5,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/joho/godotenv"
 )
 
@@ -85,29 +82,24 @@ func (m *Model) initSelectThing() {
 }
 
 // initS3List inizializes S3 state data
-func (m *Model) initS3List() tea.Cmd {
-	items := []list.Item{}
+func (m *Model) initS3List() {
+	items := []list.Item{item{title: "Fetching items..."}}
 
 	delegate := list.NewDefaultDelegate()
-	newSpinner := spinner.New()
-	newSpinner.Style = spinnerStyle
-	newSpinner.Spinner = spinner.Dot
 	m.s3List = list.New(items, delegate, 0, 0)
 	m.s3List.Title = "Select S3 Document"
 	// TODO: set item help
 
 	// TODO: figure out why spinner is not shown where the list is, but top right of the screen
 	h, v := docStyle.GetFrameSize()
-	newSpinner.Style.Align(lipgloss.Position(0))
 	m.s3List.SetSize(m.width-h, m.height-v)
-	m.s3List.SetSpinner(newSpinner.Spinner)
 
-	// To return a tea.Cmd might be useless
-	return m.s3List.StartSpinner()
 }
 
 // initMainMenu initializes main menu data
 func (m *Model) initSelectOp() {
+	// reset stack path
+	m.s3PathStack = stack.NewStack[string]()
 	items := []list.Item{
 		item{title: "EPP", desc: "Send an OTA to an ESP32 EPP microcontroller"},
 		item{title: "EC3", desc: "Send an OTA to an ESP32 EC3 microcontroller"},
@@ -127,4 +119,8 @@ func (m *Model) initSelectOp() {
 	// WARNING: m.width and m.height MUST BE INITIALIZED before calling this
 	h, v := docStyle.GetFrameSize()
 	m.operationsList.SetSize(m.width-h, m.height-v)
+}
+
+func (m *Model) initSendJob() {
+
 }
