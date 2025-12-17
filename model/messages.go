@@ -1,6 +1,9 @@
 package model
 
-import "github.com/charmbracelet/bubbles/list"
+import (
+	"github.com/aws/aws-sdk-go-v2/service/iot"
+	"github.com/charmbracelet/bubbles/list"
+)
 
 // ErrorMsg represents an error
 type ErrorMsg struct {
@@ -13,5 +16,5 @@ type S3FilesMsg struct {
 }
 
 type IoTJobMsg struct {
-	Document string
+	JobExeInput *iot.DescribeJobExecutionInput
 }

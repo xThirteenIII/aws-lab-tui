@@ -12,7 +12,7 @@ func (m Model) viewSelectJob() string {
 	// Do not copy a non-zero Builder.
 	var b strings.Builder
 	b.WriteString("Type the IoT Job name\n\n")
-	b.WriteString(m.jobInput.View())
+	b.WriteString(m.iotTool.jobInput.View())
 	b.WriteString("\n\n")
 	b.WriteString(helpCmdStyle.Render("esc ") +
 		helpStyle.Render("back • ") +
@@ -24,7 +24,7 @@ func (m Model) viewSelectJob() string {
 func (m Model) viewSelectThing() string {
 	var b strings.Builder
 	b.WriteString("Type the MAC address of the Thing\n\n")
-	b.WriteString(m.thingInput.View())
+	b.WriteString(m.iotTool.thingInput.View())
 	b.WriteString("\n\n\n")
 
 	if m.lastError != "" {
@@ -54,7 +54,7 @@ func (m Model) viewS3List() string {
 		b.WriteString(errStyle.Render(m.lastError))
 		b.WriteString("\n\n")
 	}
-	return docStyle.Render(m.s3List.View() + b.String())
+	return docStyle.Render(m.iotTool.s3List.View() + b.String())
 }
 
 func (m Model) viewError() string {

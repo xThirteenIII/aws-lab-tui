@@ -37,7 +37,7 @@ func (m Model) updateMainMenu(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // updateSelectJob handles Select Job events
 func (m Model) updateSelectJob(msg tea.Msg) (tea.Model, tea.Cmd) {
-	m.jobInput.SetSuggestions(m.suggestions.jobSuggestions)
+	m.iotTool.jobInput.SetSuggestions(m.iotTool.suggestions.jobSuggestions)
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -46,20 +46,20 @@ func (m Model) updateSelectJob(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		case "enter":
 			// Salva suggestion e vai allo stato successivo
-			m.suggestions.addJobSuggestion(m.jobInput.Value())
+			m.iotTool.suggestions.addJobSuggestion(m.iotTool.jobInput.Value())
 			m.changeState(StateSelectThing)
 			return m, nil
 		}
 	}
 
 	var cmd tea.Cmd
-	m.jobInput, cmd = m.jobInput.Update(msg)
+	m.iotTool.jobInput, cmd = m.iotTool.jobInput.Update(msg)
 	return m, cmd
 }
 
 // updateSelectThing handles SelectThing events
 func (m Model) updateSelectThing(msg tea.Msg) (tea.Model, tea.Cmd) {
-	m.thingInput.SetSuggestions(m.suggestions.macSuggestions)
+	m.iotTool.thingInput.SetSuggestions(m.iotTool.suggestions.macSuggestions)
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -69,14 +69,14 @@ func (m Model) updateSelectThing(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		case "enter":
 			// Validate MAC address
-			_, err := net.ParseMAC(m.thingInput.Value())
+			_, err := net.ParseMAC(m.iotTool.thingInput.Value())
 			if err != nil {
 				m.lastError = err.Error()
 				return m, nil
 			}
 
 			// Save new suggestion in cache
-			m.suggestions.addMacSuggestion(m.thingInput.Value())
+			m.iotTool.suggestions.addMacSuggestion(m.iotTool.thingInput.Value())
 
 			// And change to S3 state
 			m.changeState(StateSelectOp)
@@ -87,7 +87,7 @@ func (m Model) updateSelectThing(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	var cmd tea.Cmd
-	m.thingInput, cmd = m.thingInput.Update(msg)
+	m.iotTool.thingInput, cmd = m.iotTool.thingInput.Update(msg)
 	return m, cmd
 }
 
@@ -104,8 +104,8 @@ func (m Model) updateSelectionOp(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		case "enter":
 
-			// Submit user selection only if user is not filtering.
-			// If the user is filterin, enter is used to accept the filter value.
+			// Submit user selection only if user is not filtering values.
+			// If the user is filterin, "enter" is used to accept the filter value.
 			if !m.operationsList.SettingFilter() {
 				opMap := map[int]string{
 					0: "Campaign/EPP/",
@@ -116,7 +116,7 @@ func (m Model) updateSelectionOp(msg tea.Msg) (tea.Model, tea.Cmd) {
 					5: "Campaign/CEW/",
 					6: "",
 				}
-				m.s3PathStack.Push(opMap[m.operationsList.Cursor()])
+				m.iotTool.s3PathStack.Push(opMap[m.operationsList.Cursor()])
 				// And change to S3 state, this inits the s3 List
 				m.changeState(StateS3List)
 				return m, fetchS3FilesCmd(opMap[m.operationsList.Cursor()])
@@ -138,27 +138,27 @@ func (m Model) updateS3List(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.goBack()
 			return m, nil
 		case "b":
-			m.s3PathStack.Pop()
+			m.iotTool.s3PathStack.Pop()
 			// Fetch files into that folder
-			return m, fetchS3FilesCmd(m.s3PathStack.Peek())
+			return m, fetchS3FilesCmd(m.iotTool.s3PathStack.Peek())
 		case "enter":
 			// TODO: select file
 			// Check if selected item is a json file
 			// Selected item is the last element in the Stack
-			if !m.s3List.SettingFilter() {
-				if strings.HasSuffix(m.s3List.SelectedItem().(item).title, ".json") {
+			if !m.iotTool.s3List.SettingFilter() {
+				if strings.HasSuffix(m.iotTool.s3List.SelectedItem().(item).title, ".json") {
 					m.changeState(StateSendJob)
 					// send job here
 					return m, nil
 				} else {
 					// Push completePath+selected folder into the path stack
-					lastEl := m.s3PathStack.Peek()
+					lastEl := m.iotTool.s3PathStack.Peek()
 					// WARNING: if paginator takes more than 1 page, Cursor() value is
 					// always 0 < Cursor.value < len(page)
 					// use SelectedItem() to return the item selected
-					m.s3PathStack.Push(lastEl + m.s3List.SelectedItem().(item).title + "/")
+					m.iotTool.s3PathStack.Push(lastEl + m.iotTool.s3List.SelectedItem().(item).title + "/")
 					// Fetch files into that folder
-					return m, fetchS3FilesCmd(m.s3PathStack.Peek())
+					return m, fetchS3FilesCmd(m.iotTool.s3PathStack.Peek())
 				}
 			}
 		}
@@ -173,7 +173,7 @@ func (m Model) updateS3List(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Are there no files?
 		if len(message.Files) == 0 {
 			// Then show it
-			m.s3List.SetItems([]list.Item{item{title: "no item fetched"}})
+			m.iotTool.s3List.SetItems([]list.Item{item{title: "no item fetched"}})
 		} else {
 
 			// Show just base path in the list, for cleaner UI
@@ -181,14 +181,14 @@ func (m Model) updateS3List(msg tea.Msg) (tea.Model, tea.Cmd) {
 			for _, file := range message.Files {
 				basePaths = append(basePaths, path.Base(file.(item).title))
 			}
-			m.s3List.SetItems(message.Files)
+			m.iotTool.s3List.SetItems(message.Files)
 		}
 		h, v := docStyle.GetFrameSize()
-		m.s3List.SetSize(m.width-h, m.height-v)
+		m.iotTool.s3List.SetSize(m.width-h, m.height-v)
 	}
 
 	var cmd tea.Cmd
-	m.s3List, cmd = m.s3List.Update(msg)
+	m.iotTool.s3List, cmd = m.iotTool.s3List.Update(msg)
 	return m, cmd
 }
 
@@ -200,10 +200,19 @@ func (m *Model) updateSendJob(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c":
 			return m, tea.Quit
 			// cancel job
+		case "esc":
+			m.goBack()
+			return m, nil
+		case "enter":
+			sendIoTJob(m)
 
 		}
 	case IoTJobMsg:
-		// monitorJob
+
+		// Add current job to the job stack.
+		// More accurately, job description input object
+		m.iotTool.jobStack.Push(*message.JobExeInput)
+
 	}
 
 	return m, nil
