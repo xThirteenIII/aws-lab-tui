@@ -4,7 +4,6 @@ import (
 	"aws-iot-tui/stack"
 
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -23,20 +22,13 @@ type Model struct {
 	// MainMenu data
 	mainMenuList list.Model
 
-	// IoT Job Tool data
-	jobInput    textinput.Model
-	thingInput  textinput.Model
-	suggestions suggestions
-
 	// Select Operation state
 	operationsList list.Model
 
-	// S3 state data
-	s3List      list.Model
-	s3PathStack *stack.Stack[string]
-
 	// IoT Job data
 	document string
+
+	iotTool IoTToolData
 }
 
 // Init returns an initial command that performs some I/O.
